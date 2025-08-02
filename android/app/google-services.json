@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "811283299369",
+    "project_id": "filmku-apps",
+    "storage_bucket": "filmku-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811283299369:android:8609612ed4defe86f1f038",
+        "android_client_info": {
+          "package_name": "com.example.aplikasi_film"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811283299369-h0u0qc4faojsnejjru84crlrgbun8u6k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aplikasi_film",
+            "certificate_hash": "3eeb011b2c9d483aee6f5fe1833ac7e77119c2b7"
+          }
+        },
+        {
+          "client_id": "811283299369-863bg4389nggeb8dfq3sgp9en3em5qmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDh12d0zLb-ffryqDasQ6acF8ogQZjUBss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "811283299369-863bg4389nggeb8dfq3sgp9en3em5qmo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "811283299369-pu0v2d31drr5e7p0sptuk1qqgrh315lt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.aplikasiFilm"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
