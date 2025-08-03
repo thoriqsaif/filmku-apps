@@ -127,8 +127,10 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox.square(dimension: 4),
                     TextButton(
                       onPressed: () {
-                        // Navigator.pushNamed(
-                        //     context, NavigationRoutes.register.name);
+                        Navigator.pushNamed(
+                          context,
+                          NavigationRoutes.register.name,
+                        );
                       },
                       child: Text('Daftar'),
                     ),
