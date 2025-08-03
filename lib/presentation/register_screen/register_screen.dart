@@ -1,4 +1,7 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/user_controller.dart';
+import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
+import 'package:aplikasi_film/core/model/user_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +18,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController psswdController = TextEditingController();
 
   AuthController authController = Get.find();
+
+  UserController userController = Get.put(
+    UserController(Get.put(FirestoreUserService())),
+  );
 
   bool passwordVisible = true;
   @override
@@ -124,6 +131,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         emailController.text,
         psswdController.text,
       );
+
+      userController.addUser(
+        UserData(
+          userId: result.user?.uid ?? '',
+          userName: result.user?.displayName ?? '',
+          userEmail: result.user?.email ?? '',
+        ),
+      );
+
       _showSnackbar('Sukses daftar sebagai ${result.user?.email}');
 
       if (mounted) {

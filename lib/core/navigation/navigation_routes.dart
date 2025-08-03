@@ -3,7 +3,7 @@ enum NavigationRoutes {
   register(name: '/register'),
   movieList(name: '/movie/list'),
   movieDetail(name: '/movie/detail'),
-  buyMovie(name: '/movie/buy');
+  rentMovie(name: '/movie/rent');
 
   const NavigationRoutes({required this.name});
   final String name;

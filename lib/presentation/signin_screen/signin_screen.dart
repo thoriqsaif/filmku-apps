@@ -1,5 +1,9 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/user_controller.dart';
 import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
+import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
+import 'package:aplikasi_film/core/model/user_data.dart';
+import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,6 +22,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
   AuthController authController = Get.put(
     AuthController(Get.put(FirebaseAuthService())),
+  );
+
+  UserController userController = Get.put(
+    UserController(Get.put(FirestoreUserService())),
   );
 
   bool passwordVisible = true;
@@ -160,9 +168,17 @@ class _SignInScreenState extends State<SignInScreen> {
       final result = await authController.signInWithGoogle();
 
       if (result != null) {
+        userController.addUser(
+          UserData(
+            userId: result.user?.uid ?? '',
+            userName: result.user?.displayName ?? '',
+            userEmail: result.user?.email ?? '',
+          ),
+        );
+
         if (mounted) {
           _showSnackbar('Sukses masuk sebagai ${result.user?.email}');
-          //Navigator.pushNamed(context, NavigationRoutes.movieList.name);
+          Navigator.pushNamed(context, NavigationRoutes.movieList.name);
         }
       }
     } on FirebaseAuthException catch (e) {

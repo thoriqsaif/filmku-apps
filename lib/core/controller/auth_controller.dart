@@ -32,7 +32,9 @@ class AuthController {
     return state;
   }
 
-  signOut() {
-    authService.signInWithGoogle();
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+    // Optionally, you can also sign out from Google Sign-In
+    await authService.googleSignIn.signOut();
   }
 }
