@@ -1,8 +1,11 @@
 import 'package:aplikasi_film/core/controller/movie_filter.dart';
 import 'package:aplikasi_film/core/data/responses/movie_list_response.dart';
+import 'package:aplikasi_film/core/data/service/movie_detail.dart';
 import 'package:aplikasi_film/core/data/service/movie_service.dart';
 import 'package:aplikasi_film/core/data/service/search_service.dart';
 import 'package:aplikasi_film/core/data/state/remote_state.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
 class MovieListController extends GetxController {
@@ -45,6 +48,57 @@ class MovieListController extends GetxController {
 
       return result.results;
     } on Exception catch (e) {
+      _pagingState.value = RemoteStateError(e.toString());
+      rethrow;
+    }
+  }
+
+  final Rx<Genre?> selectedGenre = Rx<Genre?>(null);
+
+  // Tambahkan fungsi setGenreFilter & fetchMoviesByGenre ini
+  void setGenreFilter(Genre genre) {
+    _selectedFilter.value = MovieFilter.genres.name;
+    selectedGenre.value = genre;
+
+    _movieList.value = [];
+    _currentPage.value = 1;
+    _pagingState.value = RemoteStateNone();
+
+    fetchMoviesByGenre(genre.id, _currentPage.value);
+  }
+
+  Future<List<Result>> fetchMoviesByGenre(int genreId, int page) async {
+    try {
+      if (_pagingState.value is RemoteStateLoading) {
+        return _movieList.value; // prevent duplicate fetch
+      }
+
+      _pagingState.value = RemoteStateLoading();
+
+      final apiKey = dotenv.env['TMDB_API_KEY'];
+      final response = await Dio().get(
+        'https://api.themoviedb.org/3/discover/movie',
+        queryParameters: {
+          'api_key': apiKey,
+          'with_genres': genreId,
+          'language': 'en-US',
+          'page': page,
+        },
+      );
+
+      final List data = response.data['results'];
+      final List<Result> results = data.map((e) => Result.fromJson(e)).toList();
+
+      if (results.isEmpty) {
+        _pagingState.value = RemoteStateError('No more movies found');
+      } else {
+        _pagingState.value = RemoteStateSuccess<List<Result>>(results);
+        _currentPage.value = response.data['page'];
+        _movieList.value = _movieList.value + results;
+      }
+
+      return results;
+    } catch (e) {
       _pagingState.value = RemoteStateError(e.toString());
       rethrow;
     }
@@ -124,4 +178,13 @@ class MovieListController extends GetxController {
       rethrow;
     }
   }
+
+  //   void setGenreFilter(Genre genre) {
+  //     selectedFilter.value = MovieFilter.genres.name;
+  //     fetchMoviesByGenre(genre.id);
+  //   }
+
+  // void fetchMoviesByGenre(int genreId) async {
+  //   // Fetch movie list based on genreId
+  // }
 }
