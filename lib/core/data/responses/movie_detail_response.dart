@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:aplikasi_film/core/data/service/movie_detail.dart';
+
 MovieDetailResponse movieDetailResponseFromJson(String str) =>
     MovieDetailResponse.fromJson(json.decode(str));
 
@@ -131,18 +133,6 @@ class MovieDetailResponse {
     "vote_average": voteAverage,
     "vote_count": voteCount,
   };
-}
-
-class Genre {
-  int id;
-  String name;
-
-  Genre({required this.id, required this.name});
-
-  factory Genre.fromJson(Map<String, dynamic> json) =>
-      Genre(id: json["id"] ?? 0, name: json["name"] ?? '');
-
-  Map<String, dynamic> toJson() => {"id": id, "name": name};
 }
 
 class ProductionCompany {

@@ -1,4 +1,5 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/genre_controller.dart';
 import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
 import 'package:aplikasi_film/firebase_options.dart';
@@ -23,6 +24,9 @@ Future main() async {
 
   // enable firestore offline mode
   FirebaseFirestore.instance.settings = Settings(persistenceEnabled: true);
+
+  // Register GenreController globally with GetX
+  Get.put(GenreController());
 
   runApp(const MyApp());
 }

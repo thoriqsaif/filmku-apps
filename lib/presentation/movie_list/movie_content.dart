@@ -67,11 +67,11 @@ class _MovieListContentState extends State<MovieListContent> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Fit Movies',
+                        'Filmku Apps',
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       Text(
-                        'Stay tuned with the latest movies',
+                        'Pilih Film Favoritmu',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
@@ -113,9 +113,7 @@ class _MovieListContentState extends State<MovieListContent> {
                       child: CircularProgressIndicator(),
                     ),
                     RemoteStateError() => const Center(
-                      child: Text(
-                        "Error loading movies. Please try again later.",
-                      ),
+                      child: Text("Terjadi Error, Coba lagi."),
                     ),
                     _ => const SizedBox.shrink(),
                   };
