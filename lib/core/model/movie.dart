@@ -1,17 +1,17 @@
-class RentalMovie {
+class Movie {
   final int id;
   final String title;
   final String releaseDate;
   final String posterPath;
 
-  RentalMovie({
+  Movie({
     required this.id,
     required this.title,
     required this.releaseDate,
     required this.posterPath,
   });
 
-  factory RentalMovie.fromJson(Map<String, dynamic> json) => RentalMovie(
+  factory Movie.fromJson(Map<String, dynamic> json) => Movie(
     id: json["movie_id"],
     title: json["movie_title"],
     releaseDate: json["release_date"],

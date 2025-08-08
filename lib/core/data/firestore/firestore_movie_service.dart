@@ -1,4 +1,4 @@
-import 'package:aplikasi_film/core/model/rental_movie.dart';
+import 'package:aplikasi_film/core/model/movie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -11,13 +11,12 @@ class FirestoreMovieService {
 
   late final _moviesRef = _currentUserRef
       .collection('Rental-Movies')
-      .withConverter<RentalMovie>(
-        fromFirestore: (snapshots, _) =>
-            RentalMovie.fromJson(snapshots.data()!),
+      .withConverter<Movie>(
+        fromFirestore: (snapshots, _) => Movie.fromJson(snapshots.data()!),
         toFirestore: (movie, _) => movie.toJson(),
       );
 
-  Future addRentalMovie(RentalMovie movie) async {
+  Future addRentalMovie(Movie movie) async {
     await _moviesRef.doc(movie.id.toString()).set(movie);
   }
 
@@ -30,7 +29,7 @@ class FirestoreMovieService {
     return result.exists;
   }
 
-  Future<List<RentalMovie>> getAllRentalMovies() async {
+  Future<List<Movie>> getAllRentalMovies() async {
     final dataSnapshot = await _moviesRef.get();
 
     return dataSnapshot.docs.map((doc) => doc.data()).toList();

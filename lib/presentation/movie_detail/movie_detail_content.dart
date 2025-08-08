@@ -1,6 +1,10 @@
+import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/rental_controller.dart';
 import 'package:aplikasi_film/core/data/network/dio_api_client.dart';
 import 'package:aplikasi_film/core/data/service/movie_detail.dart';
+import 'package:aplikasi_film/core/model/sewa.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class MovieDetailContent extends StatelessWidget {
@@ -185,6 +189,38 @@ class MovieDetailContent extends StatelessWidget {
                   ),
                 );
               },
+            ),
+            const SizedBox.square(dimension: 16),
+            ElevatedButton(
+              onPressed: () {
+                final sewa = Sewa(
+                  movieId: movieDetail.id.toString(),
+                  title: movieDetail.title,
+                  rentalDays: 7,
+                  rentDate: DateTime.now(),
+                  returnDate: DateTime.now().add(Duration(days: 7)),
+                  totalPrice: movieDetail.revenue,
+                  userId: Get.find<AuthController>().userId ?? "",
+                );
+
+                final rentalController = Get.find<RentalController>();
+                rentalController.rentMovie(sewa);
+                try {
+                  rentalController.rentMovie(sewa);
+                  Get.snackbar(
+                    'Sukses',
+                    'Film berhasil disewa!',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                } catch (e) {
+                  Get.snackbar(
+                    'Gagal',
+                    'Gagal menyewa film: $e',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              },
+              child: const Text("Sewa Sekarang"),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/register_controller.dart';
 import 'package:aplikasi_film/core/controller/user_controller.dart';
 import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
 import 'package:aplikasi_film/core/model/user_data.dart';
@@ -6,33 +7,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  RegisterScreen({super.key});
 
-  @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
-}
-
-class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController psswdController = TextEditingController();
-
-  AuthController authController = Get.find();
-
-  UserController userController = Get.put(
+  final authController = Get.find<AuthController>();
+  final userController = Get.put(
     UserController(Get.put(FirestoreUserService())),
   );
+  final controller = Get.put(RegisterController());
 
-  bool passwordVisible = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+        leading: BackButton(onPressed: () => Navigator.of(context).pop()),
         title: const Text("Filmku Apps"),
       ),
       body: Center(
@@ -41,7 +29,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
@@ -52,9 +39,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
-                SizedBox.square(dimension: 32),
+                const SizedBox(height: 32),
                 TextField(
-                  controller: emailController,
+                  controller: controller.emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'Masukkan Email',
@@ -63,57 +50,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                SizedBox.square(dimension: 16),
-                TextField(
-                  controller: psswdController,
-                  obscureText: passwordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Masukkan Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                const SizedBox(height: 16),
+                Obx(
+                  () => TextField(
+                    controller: controller.passwordController,
+                    obscureText: controller.isPasswordVisible.value,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Masukkan Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          passwordVisible = !passwordVisible;
-                        });
-                      },
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible.value
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox.square(dimension: 16),
+                const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () async {
-                    _register();
-                  },
+                  onPressed: () => _register(context),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text('Daftar'),
-                    ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('Daftar'),
                   ),
                 ),
-                SizedBox.square(dimension: 32),
+                const SizedBox(height: 32),
                 Row(
                   children: [
-                    Text('Sudah punya akun?'),
-                    SizedBox.square(dimension: 4),
+                    const Text('Sudah punya akun?'),
+                    const SizedBox(width: 4),
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Masuk'),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Masuk'),
                     ),
                   ],
                 ),
@@ -125,11 +104,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Future _register() async {
+  Future<void> _register(BuildContext context) async {
     try {
       final result = await authController.register(
-        emailController.text,
-        psswdController.text,
+        controller.emailController.text,
+        controller.passwordController.text,
       );
 
       userController.addUser(
@@ -140,26 +119,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
 
-      _showSnackbar('Sukses daftar sebagai ${result.user?.email}');
-
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Get.snackbar('Sukses', 'Berhasil daftar sebagai ${result.user?.email}');
+      Get.offAllNamed('/movie/list');
     } on FirebaseAuthException catch (e) {
-      _showSnackbar('Daftar gagal: ${e.message}');
+      Get.snackbar('Gagal', 'Daftar gagal: ${e.message}');
     } catch (e) {
-      _showSnackbar('Daftar gagal');
-    }
-
-    emailController.clear();
-    psswdController.clear();
-  }
-
-  _showSnackbar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      Get.snackbar('Gagal', 'Daftar gagal: ${e.toString()}');
+    } finally {
+      controller.emailController.clear();
+      controller.passwordController.clear();
     }
   }
 }

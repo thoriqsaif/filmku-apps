@@ -1,34 +1,24 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/sign_in_controller.dart';
 import 'package:aplikasi_film/core/controller/user_controller.dart';
 import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
 import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
 import 'package:aplikasi_film/core/model/user_data.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+class SignInScreen extends StatelessWidget {
+  SignInScreen({super.key});
 
-  @override
-  State<SignInScreen> createState() => _SignInScreenState();
-}
-
-class _SignInScreenState extends State<SignInScreen> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController psswdController = TextEditingController();
-
-  AuthController authController = Get.put(
+  final authController = Get.put(
     AuthController(Get.put(FirebaseAuthService())),
   );
-
-  UserController userController = Get.put(
+  final userController = Get.put(
     UserController(Get.put(FirestoreUserService())),
   );
+  final controller = Get.put(SignInController());
 
-  bool passwordVisible = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,9 +39,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ],
                 ),
-                SizedBox.square(dimension: 32),
+                const SizedBox(height: 32),
                 TextField(
-                  controller: emailController,
+                  controller: controller.emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'Masukan Email',
@@ -60,71 +50,61 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
-                SizedBox.square(dimension: 16),
-                TextField(
-                  controller: psswdController,
-                  obscureText: passwordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Masukan Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                const SizedBox(height: 16),
+                Obx(
+                  () => TextField(
+                    controller: controller.passwordController,
+                    obscureText: controller.isPasswordVisible.value,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Masukan Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          passwordVisible = !passwordVisible;
-                        });
-                      },
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible.value
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: controller.togglePasswordVisibility,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox.square(dimension: 16),
+                const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () async {
-                    _signInWithEmail();
-                  },
+                  onPressed: () => _signInWithEmail(context),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text('Masuk'),
-                    ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('Masuk'),
                   ),
                 ),
-                SizedBox.square(dimension: 16),
-                Text('Atau'),
-                SizedBox.square(dimension: 16),
+                const SizedBox(height: 16),
+                const Text('Atau'),
+                const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () async {
-                    _signInWithGoogle();
-                  },
+                  onPressed: () => _signInWithGoogle(context),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text('Masuk dengan Google'),
-                    ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text('Masuk dengan Google'),
                   ),
                 ),
-                SizedBox.square(dimension: 32),
+                const SizedBox(height: 32),
                 Row(
                   children: [
-                    Text('Belum punya akun?'),
-                    SizedBox.square(dimension: 4),
+                    const Text('Belum punya akun?'),
+                    const SizedBox(width: 4),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(
@@ -132,7 +112,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           NavigationRoutes.register.name,
                         );
                       },
-                      child: Text('Daftar'),
+                      child: const Text('Daftar'),
                     ),
                   ],
                 ),
@@ -144,28 +124,23 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Future _signInWithEmail() async {
+  Future _signInWithEmail(BuildContext context) async {
+    final navigator = Navigator.of(context);
     try {
       final result = await authController.signIn(
-        emailController.text,
-        psswdController.text,
+        controller.emailController.text,
+        controller.passwordController.text,
       );
-
-      if (mounted) {
-        _showSnackbar('Sukses masuk sebagai ${result.user?.email}');
-        //Navigator.pushNamed(context, NavigationRoutes.movieList.name);
-      }
-    } on FirebaseAuthException catch (e) {
-      _showSnackbar('Masuk gagal: ${e.message}');
+      Get.snackbar('Berhasil', 'Sukses masuk sebagai ${result.user?.email}');
+      // Navigasi setelah login berhasil
+      navigator.pushNamed(NavigationRoutes.movieList.name);
     } catch (e) {
-      _showSnackbar('Masuk gagal');
+      Get.snackbar('Gagal', 'Masuk gagal: ${e.toString()}');
     }
-
-    emailController.clear();
-    psswdController.clear();
   }
 
-  Future _signInWithGoogle() async {
+  Future _signInWithGoogle(BuildContext context) async {
+    final navigator = Navigator.of(context);
     try {
       final result = await authController.signInWithGoogle();
 
@@ -178,25 +153,11 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
         );
 
-        if (mounted) {
-          _showSnackbar('Sukses masuk sebagai ${result.user?.email}');
-          Navigator.pushNamed(context, NavigationRoutes.movieList.name);
-        }
+        Get.snackbar('Berhasil', 'Sukses masuk sebagai ${result.user?.email}');
+        navigator.pushNamed(NavigationRoutes.movieList.name);
       }
-    } on FirebaseAuthException catch (e) {
-      _showSnackbar('Masuk gagal: ${e.message}');
-    } on GoogleSignInException catch (e) {
-      _showSnackbar('Masuk gagal: ${e.description}');
     } catch (e) {
-      _showSnackbar('Masuk gagal: $e');
-    }
-  }
-
-  _showSnackbar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      Get.snackbar('Gagal', 'Masuk gagal: ${e.toString()}');
     }
   }
 }

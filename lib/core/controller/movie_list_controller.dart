@@ -1,11 +1,10 @@
 import 'package:aplikasi_film/core/controller/movie_filter.dart';
+import 'package:aplikasi_film/core/data/network/dio_api_client.dart';
 import 'package:aplikasi_film/core/data/responses/movie_list_response.dart';
 import 'package:aplikasi_film/core/data/service/movie_detail.dart';
 import 'package:aplikasi_film/core/data/service/movie_service.dart';
 import 'package:aplikasi_film/core/data/service/search_service.dart';
 import 'package:aplikasi_film/core/data/state/remote_state.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
 class MovieListController extends GetxController {
@@ -70,19 +69,16 @@ class MovieListController extends GetxController {
   Future<List<Result>> fetchMoviesByGenre(int genreId, int page) async {
     try {
       if (_pagingState.value is RemoteStateLoading) {
-        return _movieList.value; // prevent duplicate fetch
+        return _movieList.value; // Prevent duplicate fetch
       }
 
       _pagingState.value = RemoteStateLoading();
 
-      final apiKey = dotenv.env['TMDB_API_KEY'];
-      final response = await Dio().get(
-        'https://api.themoviedb.org/3/discover/movie',
+      final response = await DioApiClient().dio.get(
+        '/discover/movie',
         queryParameters: {
-          'api_key': apiKey,
-          'with_genres': genreId,
-          'language': 'en-US',
-          'page': page,
+          'with_genres': genreId.toString(),
+          'page': page.toString(),
         },
       );
 

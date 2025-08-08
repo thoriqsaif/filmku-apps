@@ -1,6 +1,7 @@
 import 'package:aplikasi_film/core/controller/movie_list_controller.dart';
 import 'package:aplikasi_film/core/data/responses/movie_list_response.dart';
 import 'package:aplikasi_film/core/data/state/remote_state.dart';
+import 'package:aplikasi_film/presentation/widget/floating_navbar.dart';
 import 'package:aplikasi_film/presentation/widget/movie_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -80,7 +81,7 @@ class _MovieListContentState extends State<MovieListContent> {
                 ),
               ),
 
-              // PinnedHeaderSliver(child: FloatingNavbar()),
+              PinnedHeaderSliver(child: FloatingNavbar()),
               SliverToBoxAdapter(child: const SizedBox(height: 16)),
 
               SliverToBoxAdapter(
