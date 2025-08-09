@@ -1,16 +1,15 @@
-import 'package:aplikasi_film/core/controller/auth_controller.dart';
 import 'package:aplikasi_film/core/controller/rental_controller.dart';
 import 'package:aplikasi_film/core/data/network/dio_api_client.dart';
 import 'package:aplikasi_film/core/data/service/movie_detail.dart';
-import 'package:aplikasi_film/core/model/sewa.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class MovieDetailContent extends StatelessWidget {
   final MovieDetailResponse movieDetail;
+  final RentalController rentalController = Get.find<RentalController>();
 
-  const MovieDetailContent({super.key, required this.movieDetail});
+  MovieDetailContent({super.key, required this.movieDetail});
 
   static final DateFormat formatter = DateFormat("dd MMMM yyyy");
 
@@ -39,17 +38,11 @@ class MovieDetailContent extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Positioned(
-                      //   bottom:-20,
-                      //   right: 20,
-                      //   child: FavouriteButtonWidget(movieData: movieDetail),
-                      // )
                     ],
                   ),
                 ],
               ),
             ),
-
             const SizedBox.square(dimension: 16),
             Text(
               movieDetail.title,
@@ -61,7 +54,9 @@ class MovieDetailContent extends StatelessWidget {
                 const Icon(Icons.calendar_month, color: Colors.red),
                 const SizedBox.square(dimension: 4),
                 Text(
-                  movieDetail.originCountry[0],
+                  movieDetail.originCountry.isNotEmpty
+                      ? movieDetail.originCountry[0]
+                      : "-",
                   style: Theme.of(
                     context,
                   ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w400),
@@ -89,7 +84,6 @@ class MovieDetailContent extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox.square(dimension: 16),
             Text(
               "Description:",
@@ -101,7 +95,6 @@ class MovieDetailContent extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.justify,
             ),
-
             const SizedBox.square(dimension: 16),
             Row(
               children: [
@@ -133,7 +126,6 @@ class MovieDetailContent extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox.square(dimension: 16),
             Text("Languages:", style: Theme.of(context).textTheme.titleMedium),
             const SizedBox.square(dimension: 4),
@@ -150,7 +142,6 @@ class MovieDetailContent extends StatelessWidget {
                 );
               },
             ),
-
             const SizedBox.square(dimension: 16),
             Text("Countries:", style: Theme.of(context).textTheme.titleMedium),
             const SizedBox.square(dimension: 4),
@@ -169,7 +160,6 @@ class MovieDetailContent extends StatelessWidget {
                 );
               },
             ),
-
             const SizedBox.square(dimension: 16),
             Text(
               "Producer Companies:",
@@ -190,37 +180,19 @@ class MovieDetailContent extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox.square(dimension: 16),
-            ElevatedButton(
-              onPressed: () {
-                final sewa = Sewa(
-                  movieId: movieDetail.id.toString(),
-                  title: movieDetail.title,
-                  rentalDays: 7, // Default rental days
-                  rentDate: DateTime.now(),
-                  returnDate: DateTime.now().add(Duration(days: 7)),
-                  totalPrice: movieDetail.revenue,
-                  userId: Get.find<AuthController>().userId ?? "",
-                );
-
-                final rentalController = Get.find<RentalController>();
-
-                try {
-                  rentalController.rentMovie(sewa);
-                  Get.snackbar(
-                    'Sukses',
-                    'Film berhasil disewa!',
-                    snackPosition: SnackPosition.BOTTOM,
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.shopping_cart),
+                label: const Text("Sewa Film"),
+                onPressed: () {
+                  rentalController.goToSewaPage(
+                    movieDetail.id,
+                    movieDetail.title,
                   );
-                } catch (e) {
-                  Get.snackbar(
-                    'Gagal',
-                    'Gagal menyewa film: $e',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-              },
-              child: const Text("Sewa Sekarang"),
+                },
+              ),
             ),
           ],
         ),

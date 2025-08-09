@@ -1,14 +1,22 @@
 import 'package:aplikasi_film/core/model/sewa.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class SewaFilmService {
   final CollectionReference rentals = FirebaseFirestore.instance.collection(
-    'Sewa-Film',
+    'sewa_film', // ✅ disarankan lowercase dan underscore
   );
 
-  /// Tambah sewa baru
-  Future<void> rentMovie(Sewa sewa) async {
-    await rentals.add(sewa.toJson());
+  /// Tambah sewa baru → return ID dokumen
+  Future<String> rentMovie(Sewa sewa) async {
+    try {
+      final docRef = await rentals.add(sewa.toJson());
+      return docRef.id;
+    } catch (e, stacktrace) {
+      debugPrint('❌ Firestore Error (rentMovie): $e');
+      debugPrint('STACKTRACE:\n$stacktrace');
+      rethrow;
+    }
   }
 
   /// Ambil semua sewa milik user
@@ -16,15 +24,19 @@ class SewaFilmService {
     try {
       final querySnapshot = await rentals
           .where('userId', isEqualTo: userId)
+          .orderBy(
+            'tanggalSewa',
+            descending: true,
+          ) // ✅ supaya data terbaru di atas
           .get();
 
       return querySnapshot.docs.map((doc) {
         return Sewa.fromFirestore(doc);
       }).toList();
     } catch (e, stacktrace) {
-      print('❌ Firestore Error (getUserRentals): $e');
-      print('STACKTRACE:\n$stacktrace');
-      rethrow;
+      debugPrint('❌ Firestore Error (getUserRentals): $e');
+      debugPrint('STACKTRACE:\n$stacktrace');
+      return []; // ✅ supaya UI tidak crash
     }
   }
 
@@ -36,8 +48,8 @@ class SewaFilmService {
     try {
       await rentals.doc(sewa.id).update(sewa.toJson());
     } catch (e, stacktrace) {
-      print('❌ Firestore Error (updateRental): $e');
-      print('STACKTRACE:\n$stacktrace');
+      debugPrint('❌ Firestore Error (updateRental): $e');
+      debugPrint('STACKTRACE:\n$stacktrace');
       rethrow;
     }
   }
@@ -47,8 +59,8 @@ class SewaFilmService {
     try {
       await rentals.doc(rentalId).delete();
     } catch (e, stacktrace) {
-      print('❌ Firestore Error (deleteRental): $e');
-      print('STACKTRACE:\n$stacktrace');
+      debugPrint('❌ Firestore Error (deleteRental): $e');
+      debugPrint('STACKTRACE:\n$stacktrace');
       rethrow;
     }
   }

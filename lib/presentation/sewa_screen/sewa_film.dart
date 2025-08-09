@@ -1,8 +1,10 @@
 import 'package:aplikasi_film/core/controller/rental_controller.dart';
 import 'package:aplikasi_film/core/model/sewa.dart';
+import 'package:aplikasi_film/presentation/sewa_screen/daftar_sewa.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class SewaFilm extends StatefulWidget {
   final String movieId;
@@ -16,12 +18,16 @@ class SewaFilm extends StatefulWidget {
 
 class _SewaFilmState extends State<SewaFilm> {
   final rentalController = Get.find<RentalController>();
+  final currencyFormat = NumberFormat.currency(
+    locale: 'id',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   int rentalDays = 1;
   int get totalPrice => rentalDays * 5000;
 
   Future<void> handleSewa() async {
-    print('[DEBUG] Tombol Sewa ditekan');
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
     final now = DateTime.now();
     final sewa = Sewa(
@@ -35,26 +41,29 @@ class _SewaFilmState extends State<SewaFilm> {
     );
 
     await rentalController.rentMovie(sewa);
-    Get.back();
 
     if (!rentalController.isLoading.value) {
       Get.snackbar('Sukses', 'Film berhasil disewa');
-      Get.back();
+      // Navigasi langsung ke halaman daftar sewa
+      Get.off(() => DaftarSewa());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sewa Film')),
+      appBar: AppBar(title: const Text('Sewa Film')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Judul: ${widget.title}', style: TextStyle(fontSize: 18)),
+            Text(
+              'Judul: ${widget.title}',
+              style: const TextStyle(fontSize: 18),
+            ),
             const SizedBox(height: 20),
-            Text('Lama sewa (1–7 hari):'),
+            const Text('Lama sewa (1–7 hari):'),
             DropdownButton<int>(
               value: rentalDays,
               items: List.generate(7, (i) => i + 1)
@@ -69,17 +78,29 @@ class _SewaFilmState extends State<SewaFilm> {
               },
             ),
             const SizedBox(height: 20),
-            Text('Harga per hari: Rp 5.000'),
+            Text('Harga per hari: ${currencyFormat.format(5000)}'),
             const SizedBox(height: 10),
-            Text('Total harga: Rp $totalPrice'),
-            const SizedBox(height: 30),
+            Text('Total harga: ${currencyFormat.format(totalPrice)}'),
+            const Spacer(),
             Obx(() {
-              return rentalController.isLoading.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: handleSewa,
-                      child: const Text('Sewa Sekarang'),
-                    );
+              return SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: rentalController.isLoading.value
+                      ? null
+                      : handleSewa,
+                  child: rentalController.isLoading.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Sewa Sekarang'),
+                ),
+              );
             }),
           ],
         ),

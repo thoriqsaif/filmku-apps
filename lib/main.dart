@@ -34,8 +34,8 @@ Future<void> main() async {
   Get.put(GenreController());
   Get.put<FirebaseAuthService>(FirebaseAuthService());
   Get.put<AuthController>(AuthController(Get.find<FirebaseAuthService>()));
-  Get.put(FirestoreUserService());
-  Get.put(UserController(Get.find<FirestoreUserService>()));
+  Get.put<FirestoreUserService>(FirestoreUserService());
+  Get.lazyPut<UserController>(() => UserController(Get.find()));
   Get.put(SewaFilmService());
   Get.put(RentalController(Get.find<SewaFilmService>()));
 
@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
                   final args = Get.arguments;
                   if (args is Map<String, dynamic>) {
                     return SewaFilm(
-                      movieId: args['movieId'],
+                      movieId: args['movieId'].toString(),
                       title: args['title'],
                     );
                   }

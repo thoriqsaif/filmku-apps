@@ -107,18 +107,18 @@ class RegisterScreen extends StatelessWidget {
   Future<void> _register(BuildContext context) async {
     try {
       final result = await authController.register(
-        controller.emailController.text,
-        controller.passwordController.text,
+        controller.nameController.text, // Name
+        controller.emailController.text, // Email
+        controller.passwordController.text, // Password
       );
 
-      userController.addUser(
+      await userController.addUser(
         UserData(
           userId: result.user?.uid ?? '',
-          userName: result.user?.displayName ?? '',
+          userName: controller.nameController.text, // Ambil dari form
           userEmail: result.user?.email ?? '',
         ),
       );
-
       Get.snackbar('Sukses', 'Berhasil daftar sebagai ${result.user?.email}');
       Get.offAllNamed('/movie/list');
     } on FirebaseAuthException catch (e) {

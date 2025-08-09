@@ -4,6 +4,7 @@ import 'package:aplikasi_film/core/controller/movie_filter.dart';
 import 'package:aplikasi_film/core/controller/movie_list_controller.dart';
 import 'package:aplikasi_film/core/data/service/movie_detail.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
+import 'package:aplikasi_film/presentation/sewa_screen/daftar_sewa.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -70,28 +71,20 @@ class _MainMenuNavbarState extends State<MainMenuNavbar> {
               child: Text('Popular'),
             );
           }),
-          Obx(() {
-            return TextButton(
-              onPressed: () {
-                movieListController.setFilter(MovieFilter.topRated);
-              },
-              style: ButtonStyle(
-                shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(
-                      color:
-                          movieListController.selectedFilter ==
-                              MovieFilter.topRated.name
-                          ? Colors.cyan
-                          : Colors.white,
-                    ),
-                  ),
+          TextButton(
+            onPressed: () {
+              Get.to(() => DaftarSewa());
+            },
+            style: ButtonStyle(
+              shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                  side: const BorderSide(color: Colors.white),
                 ),
               ),
-              child: Text('Top Rated'),
-            );
-          }),
+            ),
+            child: const Text('Daftar Sewa'),
+          ),
           Obx(() {
             final genres = Get.find<GenreController>().genres;
             return PopupMenuButton<Genre>(
