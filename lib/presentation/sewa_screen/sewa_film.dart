@@ -20,7 +20,8 @@ class _SewaFilmState extends State<SewaFilm> {
   int rentalDays = 1;
   int get totalPrice => rentalDays * 5000;
 
-  void handleSewa() {
+  Future<void> handleSewa() async {
+    print('[DEBUG] Tombol Sewa ditekan');
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
     final now = DateTime.now();
     final sewa = Sewa(
@@ -33,8 +34,13 @@ class _SewaFilmState extends State<SewaFilm> {
       totalPrice: totalPrice,
     );
 
-    rentalController.rentMovie(sewa);
-    Get.back(); // kembali ke halaman sebelumnya
+    await rentalController.rentMovie(sewa);
+    Get.back();
+
+    if (!rentalController.isLoading.value) {
+      Get.snackbar('Sukses', 'Film berhasil disewa');
+      Get.back();
+    }
   }
 
   @override

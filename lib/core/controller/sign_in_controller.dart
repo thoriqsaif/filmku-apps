@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 class SignInController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final isPasswordVisible = true.obs;
+  final isLoading = false.obs;
 
-  var isPasswordVisible = true.obs;
-
-  void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
-  }
+  void togglePasswordVisibility() =>
+      isPasswordVisible.value = !isPasswordVisible.value;
 
   @override
   void onClose() {

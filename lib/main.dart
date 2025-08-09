@@ -6,7 +6,6 @@ import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
 import 'package:aplikasi_film/core/data/firestore/firestore_sewa_service.dart';
 import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
-import 'package:aplikasi_film/firebase_options.dart';
 import 'package:aplikasi_film/presentation/movie_detail/movie_detail_screen.dart';
 import 'package:aplikasi_film/presentation/movie_list/movie_list.dart';
 import 'package:aplikasi_film/presentation/register_screen/register_screen.dart';
@@ -19,24 +18,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
-Future main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
-  // Load environment variables from .env file
+  // Load .env
   await dotenv.load(fileName: ".env");
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Firestore offline mode
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+  );
 
-  // Enable Firestore offline mode
-  FirebaseFirestore.instance.settings = Settings(persistenceEnabled: true);
-
-  // Register dependencies using GetX (Dependency Injection)
+  // Dependency Injection GetX
   Get.put(GenreController());
-  Get.put(AuthController(Get.put(FirebaseAuthService())));
-  Get.put(UserController(Get.put(FirestoreUserService())));
+  Get.put<FirebaseAuthService>(FirebaseAuthService());
+  Get.put<AuthController>(AuthController(Get.find<FirebaseAuthService>()));
+  Get.put(FirestoreUserService());
+  Get.put(UserController(Get.find<FirestoreUserService>()));
   Get.put(SewaFilmService());
-  Get.put(RentalController(SewaFilmService()));
+  Get.put(RentalController(Get.find<SewaFilmService>()));
+
   runApp(const MyApp());
 }
 
@@ -52,7 +54,8 @@ class MyApp extends StatelessWidget {
       stream: signInState,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
-          return MaterialApp(
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Cari Film FavoritMu!',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
@@ -62,34 +65,49 @@ class MyApp extends StatelessWidget {
             initialRoute: snapshot.data != null
                 ? NavigationRoutes.movieList.name
                 : NavigationRoutes.signin.name,
-            routes: {
-              NavigationRoutes.signin.name: (_) => SignInScreen(),
-              NavigationRoutes.register.name: (_) => RegisterScreen(),
-              NavigationRoutes.movieList.name: (_) => MovieListScreen(),
-              NavigationRoutes.movieDetail.name: (context) {
-                final args = ModalRoute.of(context)?.settings.arguments;
-                final movieId = args is int ? args : 0;
-
-                return MovieDetailScreen(movieId: movieId);
-              },
-              NavigationRoutes.sewaFilm.name: (context) {
-                final args = ModalRoute.of(context)?.settings.arguments;
-                if (args is Map<String, dynamic>) {
-                  return SewaFilm(
-                    movieId: args['movieId'],
-                    title: args['title'],
+            getPages: [
+              GetPage(
+                name: NavigationRoutes.signin.name,
+                page: () => SignInScreen(),
+              ),
+              GetPage(
+                name: NavigationRoutes.register.name,
+                page: () => RegisterScreen(),
+              ),
+              GetPage(
+                name: NavigationRoutes.movieList.name,
+                page: () => MovieListScreen(),
+              ),
+              GetPage(
+                name: NavigationRoutes.movieDetail.name,
+                page: () {
+                  final args = Get.arguments;
+                  final movieId = args is int ? args : 0;
+                  return MovieDetailScreen(movieId: movieId);
+                },
+              ),
+              GetPage(
+                name: NavigationRoutes.sewaFilm.name,
+                page: () {
+                  final args = Get.arguments;
+                  if (args is Map<String, dynamic>) {
+                    return SewaFilm(
+                      movieId: args['movieId'],
+                      title: args['title'],
+                    );
+                  }
+                  return const Scaffold(
+                    body: Center(child: Text('Data film tidak valid')),
                   );
-                }
-                return const Scaffold(
-                  body: Center(child: Text('Data film tidak valid')),
-                );
-              },
-              // NavigationRoutes.favourite.name: (_) => FavouriteMovieScreen(),
-            },
+                },
+              ),
+            ],
           );
         }
 
-        return const Center(child: CircularProgressIndicator());
+        return const MaterialApp(
+          home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        );
       },
     );
   }

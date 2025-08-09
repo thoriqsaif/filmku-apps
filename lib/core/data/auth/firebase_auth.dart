@@ -63,4 +63,9 @@ class FirebaseAuthService {
     googleSignIn.signOut();
     firebaseAuth.signOut();
   }
+
+  User? get currentUser => firebaseAuth.currentUser;
+  String? get userId => firebaseAuth.currentUser?.uid;
+
+  Future<void> signOut() async {}
 }

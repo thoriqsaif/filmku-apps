@@ -9,7 +9,11 @@ class FirestoreUserService {
         toFirestore: (user, _) => user.toJson(),
       );
 
-  Future addUser(UserData user) async {
-    await _userRef.doc(user.userId).set(user);
+  Future<void> addUser(UserData user) async {
+    try {
+      await _userRef.doc(user.userId).set(user);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

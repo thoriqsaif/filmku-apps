@@ -196,7 +196,7 @@ class MovieDetailContent extends StatelessWidget {
                 final sewa = Sewa(
                   movieId: movieDetail.id.toString(),
                   title: movieDetail.title,
-                  rentalDays: 7,
+                  rentalDays: 7, // Default rental days
                   rentDate: DateTime.now(),
                   returnDate: DateTime.now().add(Duration(days: 7)),
                   totalPrice: movieDetail.revenue,
@@ -204,7 +204,7 @@ class MovieDetailContent extends StatelessWidget {
                 );
 
                 final rentalController = Get.find<RentalController>();
-                rentalController.rentMovie(sewa);
+
                 try {
                   rentalController.rentMovie(sewa);
                   Get.snackbar(
