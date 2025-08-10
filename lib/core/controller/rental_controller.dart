@@ -15,9 +15,9 @@ class RentalController extends GetxController {
 
   Future<void> rentMovie(Sewa sewa) async {
     try {
-      print('[DEBUG] Mulai proses sewa: ${sewa.toJson()}');
+      debugPrint('[DEBUG] Mulai proses sewa: ${sewa.toJson()}');
       isLoading.value = true;
-      await rentalService.rentMovie(sewa);
+      await SewaFilmService().rentMovie(sewa);
       rentals.add(sewa);
       Get.snackbar('Sukses', 'Film berhasil disewa');
     } catch (e, stacktrace) {

@@ -40,12 +40,12 @@ class _SewaFilmState extends State<SewaFilm> {
       totalPrice: totalPrice,
     );
 
-    await rentalController.rentMovie(sewa);
-
-    if (!rentalController.isLoading.value) {
+    try {
+      await rentalController.rentMovie(sewa);
       Get.snackbar('Sukses', 'Film berhasil disewa');
-      // Navigasi langsung ke halaman daftar sewa
       Get.off(() => DaftarSewa());
+    } catch (e) {
+      Get.snackbar('Gagal', 'Terjadi kesalahan saat menyewa film');
     }
   }
 
