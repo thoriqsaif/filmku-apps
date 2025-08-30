@@ -1,10 +1,12 @@
 import 'package:aplikasi_film/core/controller/auth_controller.dart';
+import 'package:aplikasi_film/core/controller/password_rive_controller.dart';
 import 'package:aplikasi_film/core/controller/sign_in_controller.dart';
 import 'package:aplikasi_film/core/controller/user_controller.dart';
 import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
 import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
 import 'package:aplikasi_film/core/model/user_data.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
+import 'package:aplikasi_film/presentation/widget/rive_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +20,9 @@ class SignInScreen extends StatelessWidget {
     UserController(Get.put(FirestoreUserService())),
   );
   final controller = Get.put(SignInController());
+
+  // Controller untuk animasi Rive
+  final passwordRiveController = PasswordRiveController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +45,8 @@ class SignInScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 32),
+
+                // Email field
                 TextField(
                   controller: controller.emailController,
                   decoration: InputDecoration(
@@ -51,28 +58,57 @@ class SignInScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Password field dengan animasi Rive
                 Obx(
-                  () => TextField(
-                    controller: controller.passwordController,
-                    obscureText: controller.isPasswordVisible.value,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Masukan Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          controller.isPasswordVisible.value
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                  () => Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      TextField(
+                        controller: controller.passwordController,
+                        obscureText: controller.isPasswordVisible.value,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          hintText: 'Masukan Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              controller.isPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              controller.togglePasswordVisibility();
+
+                              // ✅ panggil animasi lewat controller
+                              passwordRiveController.toggleEye(
+                                controller.isPasswordVisible.value,
+                              );
+                            },
+                          ),
                         ),
-                        onPressed: controller.togglePasswordVisibility,
                       ),
-                    ),
+                      // Animasi Rive di pojok kanan textfield
+                      Positioned(
+                        right: 8,
+                        child: SizedBox(
+                          height: 60,
+                          width: 60,
+                          child: PasswordRiveAnimation(
+                            controller: controller.passwordController,
+                            riveController: passwordRiveController,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 16),
+
+                // Tombol login
                 ElevatedButton(
                   onPressed: () => _signInWithEmail(context),
                   style: ElevatedButton.styleFrom(
@@ -125,22 +161,21 @@ class SignInScreen extends StatelessWidget {
   }
 
   Future _signInWithEmail(BuildContext context) async {
-    final navigator = Navigator.of(context);
     try {
       final result = await authController.signIn(
         controller.emailController.text,
         controller.passwordController.text,
       );
       Get.snackbar('Berhasil', 'Sukses masuk sebagai ${result.user?.email}');
-      // Navigasi setelah login berhasil
-      navigator.pushNamed(NavigationRoutes.movieList.name);
+
+      // Ganti navigator.pushNamed → Get.offAllNamed
+      Get.offAllNamed('/loadingAnimation');
     } catch (e) {
       Get.snackbar('Gagal', 'Masuk gagal: ${e.toString()}');
     }
   }
 
   Future _signInWithGoogle(BuildContext context) async {
-    final navigator = Navigator.of(context);
     try {
       final result = await authController.signInWithGoogle();
 
@@ -154,7 +189,7 @@ class SignInScreen extends StatelessWidget {
         );
 
         Get.snackbar('Berhasil', 'Sukses masuk sebagai ${result.user?.email}');
-        navigator.pushNamed(NavigationRoutes.movieList.name);
+        Get.offAllNamed('/loadingAnimation');
       }
     } catch (e) {
       Get.snackbar('Gagal', 'Masuk gagal: ${e.toString()}');

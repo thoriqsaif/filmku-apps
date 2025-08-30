@@ -1,16 +1,11 @@
-import 'package:aplikasi_film/core/controller/auth_controller.dart';
-import 'package:aplikasi_film/core/controller/genre_controller.dart';
-import 'package:aplikasi_film/core/controller/rental_controller.dart';
-import 'package:aplikasi_film/core/controller/user_controller.dart';
-import 'package:aplikasi_film/core/data/auth/firebase_auth.dart';
-import 'package:aplikasi_film/core/data/firestore/firestore_sewa_service.dart';
-import 'package:aplikasi_film/core/data/firestore/firestore_user_service.dart';
+import 'package:aplikasi_film/core/binding/bindings.dart';
 import 'package:aplikasi_film/core/navigation/navigation_routes.dart';
 import 'package:aplikasi_film/presentation/movie_detail/movie_detail_screen.dart';
 import 'package:aplikasi_film/presentation/movie_list/movie_list.dart';
 import 'package:aplikasi_film/presentation/register_screen/register_screen.dart';
 import 'package:aplikasi_film/presentation/sewa_screen/sewa_film.dart';
 import 'package:aplikasi_film/presentation/signin_screen/signin_screen.dart';
+import 'package:aplikasi_film/presentation/widget/lottie_screen.dart';
 import 'package:aplikasi_film/presentation/widget/splash_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,15 +25,6 @@ Future<void> main() async {
     persistenceEnabled: true,
   );
 
-  // Dependency Injection GetX
-  Get.put(GenreController());
-  Get.put<FirebaseAuthService>(FirebaseAuthService());
-  Get.put<AuthController>(AuthController(Get.find<FirebaseAuthService>()));
-  Get.put<FirestoreUserService>(FirestoreUserService());
-  Get.lazyPut<UserController>(() => UserController(Get.find()));
-  Get.put(SewaFilmService());
-  Get.put(RentalController(Get.find<SewaFilmService>()));
-
   runApp(const MyApp());
 }
 
@@ -56,6 +42,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const BounceSplashScreen(),
+      initialBinding: AppBindings(), // ✅ semua dependency di sini
       getPages: [
         GetPage(name: NavigationRoutes.signin.name, page: () => SignInScreen()),
         GetPage(
@@ -88,6 +75,10 @@ class MyApp extends StatelessWidget {
               body: Center(child: Text('Data film tidak valid')),
             );
           },
+        ),
+        GetPage(
+          name: '/loadingAnimation',
+          page: () => const LoadingAnimationScreen(),
         ),
       ],
     );
