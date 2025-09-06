@@ -26,6 +26,30 @@ class MovieListController extends GetxController {
 
   get movieList => _movieList.value;
 
+  Future<void> loadInitialMovies() async {
+    _movieList.value = [];
+    _currentPage.value = 1;
+    _pagingState.value = RemoteStateLoading();
+
+    try {
+      final result = await movieService.fetchMovies(
+        MovieFilter.nowPlaying.name,
+        1,
+      );
+
+      if (result.results.isEmpty) {
+        _pagingState.value = RemoteStateError('No movies found');
+      } else {
+        _pagingState.value = RemoteStateSuccess<MovieListResponse>(result);
+        _movieList.value = result.results;
+        _currentPage.value = result.page;
+      }
+    } catch (e) {
+      _pagingState.value = RemoteStateError(e.toString());
+      rethrow;
+    }
+  }
+
   Future<List<Result>> getMovieList(String filter, int page) async {
     try {
       if (_pagingState.value is RemoteStateLoading) {
